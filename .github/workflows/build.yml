@@ -1,0 +1,69 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Build main EXE
+        run: |
+          pyinstaller --onefile --windowed --name "KKKXCS-v1" `
+            --hidden-import activation `
+            --hidden-import engine `
+            --hidden-import tkinter `
+            --hidden-import tkinter.ttk `
+            --hidden-import tkinter.messagebox `
+            --hidden-import tkinter.filedialog `
+            --hidden-import hashlib `
+            --hidden-import hmac `
+            --hidden-import json `
+            --hidden-import ssl `
+            --hidden-import struct `
+            --hidden-import threading `
+            --hidden-import concurrent.futures `
+            --hidden-import urllib.request `
+            --hidden-import platform `
+            --hidden-import subprocess `
+            --hidden-import re `
+            --hidden-import datetime `
+            --hidden-import tempfile `
+            --hidden-import pathlib `
+            --add-data "engine.py;." `
+            --add-data "activation.py;." `
+            --add-data "gui.py;." `
+            --clean --noconfirm `
+            main.py
+
+      - name: Build GenCode EXE
+        run: |
+          pyinstaller --onefile --windowed --name "activate-gen-v1" `
+            --hidden-import activation `
+            --hidden-import tkinter `
+            --hidden-import tkinter.ttk `
+            --hidden-import tkinter.messagebox `
+            --add-data "activation.py;." `
+            --clean --noconfirm `
+            gen_code_gui.py
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: |
+            dist/KKKXCS-v1.exe
+            dist/activate-gen-v1.exe
